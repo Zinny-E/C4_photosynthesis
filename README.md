@@ -1,3 +1,3 @@
 # C4_photosynthesis
-Repository with C4 photosynthetic acclimation model manipulation. 
+Repository conating C4 photosynthetic acclimation data and code for meta analysis 
 
