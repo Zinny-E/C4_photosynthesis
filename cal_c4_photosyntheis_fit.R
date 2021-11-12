@@ -12,19 +12,12 @@ library(doBy); library(stats)
 # load minpack.lm package to fit C4 curves using nlsLM
 ############################################
 library(minpack.lm)
-
 ############################################
 # load implementation of C4 ACi curve fitter (based on von Caemmerer 2000 and function AciC4 from plantecophys)
 ############################################
 #general inputs
 
-
-
-
-
-
 #Km,GammaStar Optionally, provide Michaelis-Menten coefficient for Farquhar model, and Gammastar. If not provided, they are calculated with a built-in function of leaf temperature
-
 
 #Rd Day respiration rate (mu mol m-2 s-1), optional (if not provided, calculated from Tleaf, Rd0, Q10 and TrefR). Must be a positive value (an error occurs when a negative value is supplied
 
@@ -76,9 +69,10 @@ c_tresp_R <- -0.00179152 # value for c parameter in temperature response curve f
 ############################################
 # read in ACi curve
 ############################################
-source<- read.csv('A_Ci_rawdata.csv') # set path within local environment
+source<- read.csv("~/git_repo/C4_photosynthesis/data/A_Ci_rawdata.csv") # set path within local environment
 reps<-unique(source$curve_no)
-aci_c4<-subset(source, curve_no == reps[[88]])
+aci_c4<-subset(source, curve_no == reps[[6]])
+#head(aci_c4)
 ############################################
 # read in SLCE_data
 ############################################'
@@ -137,12 +131,18 @@ fit_light = nlsLM(A.light.func, data= subset(aci_c4, ci >= ci_trans),
 
 output<-data.frame(Vcmax=as.numeric(),
                     Vpmax=as.numeric(), 
+                   Jmax=as.numeric(),
                    ci_trans=as.numeric())
 
+
+
 sum.enzyme<-summary(fit_enzyme)
+sum.light<-summary(fit_light)
+
 Vcmax<-sum.enzyme$coefficients[1,1]
 Vpmax<-sum.enzyme$coefficients[2,1]
+Jmax<-sum.light$coefficients[1,3]
 
-temp.df<-data.frame(Vcmax, Vpmax, ci_trans)
+temp.df<-data.frame(Vcmax, Vpmax,Jmax, ci_trans)
 
 #output<-rbind(output, temp.df)
