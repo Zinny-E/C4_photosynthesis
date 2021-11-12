@@ -4,8 +4,9 @@
 ############################################
 library(doBy); library(stats)
 # rm(list=ls()); 
-dev.off(); 
-cat("\f") # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+#clear console
+#dev.off(); 
+#cat("\f") # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 ############################################
 # load minpack.lm package to fit C4 curves using nlsLM
@@ -16,26 +17,26 @@ library(minpack.lm)
 # load implementation of C4 ACi curve fitter (based on von Caemmerer 2000 and function AciC4 from plantecophys)
 ############################################
 #general inputs
-#O2 Mesophyll O2 concentration
-#FRM Fraction of day respiration that is mesophyll respiration (Rm)
-#alpha Fraction of PSII activity in the bundle sheath (-)
-#Q10 T-dependence parameter for Michaelis-Menten coefficients
-#x Partitioning factor for electron transport
-#THETA Shape parameter of the non-rectangular hyperbola
+
+
+
+
+
+
 #Km,GammaStar Optionally, provide Michaelis-Menten coefficient for Farquhar model, and Gammastar. If not provided, they are calculated with a built-in function of leaf temperature
-#Vpr PEP regeneration (mu mol m-2 s-1)
-#gbs Bundle sheath conductance (mol m-2 s-1)
+
+
 #Rd Day respiration rate (mu mol m-2 s-1), optional (if not provided, calculated from Tleaf, Rd0, Q10 and TrefR). Must be a positive value (an error occurs when a negative value is supplied
 
-O2=210
-FRM=0.5
-alpha=0
-Q10=2
-x=0.4
-THETA=0.7
+O2=210 #O2 Mesophyll O2 concentration
+FRM=0.5 #FRM Fraction of day respiration that is mesophyll respiration (Rm)
+alpha=0 #alpha Fraction of PSII activity in the bundle sheath (-)
+Q10=2 #Q10 T-dependence parameter for Michaelis-Menten coefficients
+x=0.4 #x Partitioning factor for electron transport
+THETA=0.7 #THETA Shape parameter of the non-rectangular hyperbola
 low_gammastar <- 1.93e-4 # Half the reciprocal for Rubisco specificity (NOT CO2 compensation point)
-Vpr=80
-gbs= 3e-3
+Vpr=80 #Vpr PEP regeneration (mu mol m-2 s-1)
+gbs= 3e-3 #gbs Bundle sheath conductance (mol m-2 s-1)
 
 # enzyme-limited photosynthesis function
 A.enzyme.func=a ~ (-(-(((pmin(ci * Vpmax/(ci + Kp), Vpr)) - Rm + gbs * ci) + (Vcmax - Rd) + gbs * 
@@ -75,12 +76,12 @@ c_tresp_R <- -0.00179152 # value for c parameter in temperature response curve f
 ############################################
 # read in ACi curve
 ############################################
-source <- read.csv('A_Ci_rawdata.csv') # set path within local environment
+source<- read.csv('A_Ci_rawdata.csv') # set path within local environment
 reps<-unique(source$curve_no)
-aci_c4<-subset(source, curve_no == reps[[29]])
+aci_c4<-subset(source, curve_no == reps[[88]])
 ############################################
 # read in SLCE_data
-############################################
+############################################'
 #slce <- read.csv('LCE_data.csv') # set path to local environment
 #slce_c4 = subset(slce, aci_id == id_c4) # slce data for individual of interest
 
@@ -95,8 +96,8 @@ aci_c4<-subset(source, curve_no == reps[[29]])
 ############################################
 # set fit parameters (see documentation for function AciC4 from plantecophys)
 ############################################
-Tleaf= 25 # in dataframe, in CHR format
-Rd= 1
+Tleaf=25 # in dataframe, in CHR format # mean of measurement_t = 24.7
+Rd= 1 #find that article on this. 
 PPFD=mean(aci_c4$measurement_ppfd)
 # Michaelis-Menten coefficients for CO2 (Kc, mu mol mol-1) and O (Ko, mmol mol-1) and combined (K)
 Kc <- 650*Q10^((Tleaf-25)/10)
@@ -120,7 +121,7 @@ abline(v = ci_trans)
 ############################################
 # fit the enzyme and light limited portions of the curve separately
 ############################################
-est.Vcmax<-30
+#est.Vcmax<-30
 
 fit_enzyme <- nlsLM(A.enzyme.func, data = subset(aci_c4, ci < ci_trans & ci > 0), 
                     start=list(Vcmax=10,Vpmax=100), control=nls.control(maxiter=500, minFactor=1/10000)) # fit the enzyme limited portion of the curve (Vcmax and Vpmax)
@@ -135,12 +136,13 @@ fit_light = nlsLM(A.light.func, data= subset(aci_c4, ci >= ci_trans),
 
 
 output<-data.frame(Vcmax=as.numeric(),
-                    Vpmax=as.numeric())
+                    Vpmax=as.numeric(), 
+                   ci_trans=as.numeric())
 
 sum.enzyme<-summary(fit_enzyme)
 Vcmax<-sum.enzyme$coefficients[1,1]
 Vpmax<-sum.enzyme$coefficients[2,1]
 
-temp.df<-data.frame(Vcmax, Vpmax)
+temp.df<-data.frame(Vcmax, Vpmax, ci_trans)
 
-output<-rbind(output, temp.df)
+#output<-rbind(output, temp.df)
